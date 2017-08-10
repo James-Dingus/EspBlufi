@@ -230,7 +230,9 @@ public class BlufiCommunicator implements IBlufiCommunicator {
         }
 
         // Post security mode success, check security result
-        if (result == BlufiSecurityResult.SUCCESS) {
+        // TODO Blufi don't support check yet
+        boolean devSupportCheck = false;
+        if (result == BlufiSecurityResult.SUCCESS && devSupportCheck) {
             BlufiUtils.sleep(10L);
             if (!checkNegSec()) {
                 EspLog.w("negotiateSecurity check failed");
@@ -348,8 +350,15 @@ public class BlufiCommunicator implements IBlufiCommunicator {
     private boolean receiveNegotiateSecurity(EspDH dhm) {
         BlufiNotiData receiveData = receive();
         if (receiveData != null) {
+            DataUtil.printBytes(receiveData.getDataArray());
             String receiveStr = DataUtil.bytesToString(receiveData.getDataArray());
-            BigInteger devicePublicValue = new BigInteger(receiveStr, 16);
+            BigInteger devicePublicValue;
+            try {
+                devicePublicValue = new BigInteger(receiveStr, 16);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                return false;
+            }
 
             try {
                 dhm.generateSecretKey(devicePublicValue);
@@ -793,18 +802,18 @@ public class BlufiCommunicator implements IBlufiCommunicator {
         }
         BlufiUtils.sleep(10);
 
-        if (params.getMeshID() != null) {
-            int tokenType = getTypeValue(Type.Data.PACKAGE_VALUE, Type.Data.SUBTYPE_NEG);
-            byte[] tokenBytes = params.getMeshID();
-            byte[] postTokenBytes = new byte[tokenBytes.length + 1];
-            postTokenBytes[0] = NEG_SET_MESH_ID;
-            System.arraycopy(tokenBytes, 0, postTokenBytes, 1, tokenBytes.length);
-            result = post(mEncrypted, mChecksum, mRequireAck, tokenType, postTokenBytes);
-            if (!result) {
-                return false;
-            }
-            BlufiUtils.sleep(10);
-        }
+//        if (params.getMeshID() != null) {
+//            int tokenType = getTypeValue(Type.Data.PACKAGE_VALUE, Type.Data.SUBTYPE_NEG);
+//            byte[] tokenBytes = params.getMeshID();
+//            byte[] postTokenBytes = new byte[tokenBytes.length + 1];
+//            postTokenBytes[0] = NEG_SET_MESH_ID;
+//            System.arraycopy(tokenBytes, 0, postTokenBytes, 1, tokenBytes.length);
+//            result = post(mEncrypted, mChecksum, mRequireAck, tokenType, postTokenBytes);
+//            if (!result) {
+//                return false;
+//            }
+//            BlufiUtils.sleep(10);
+//        }
 
         if (params.getWifiChannel() > 0) {
             int channelType = getTypeValue(Type.Data.PACKAGE_VALUE, Type.Data.SUBTYPE_NEG);

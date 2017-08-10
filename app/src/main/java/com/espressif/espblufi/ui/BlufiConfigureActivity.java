@@ -173,6 +173,7 @@ public class BlufiConfigureActivity extends BlufiAbsActivity {
 
                         @Override
                         public void onError(Throwable e) {
+                            e.printStackTrace();
                             mOverQueue.add(new Object());
                         }
 
@@ -217,6 +218,7 @@ public class BlufiConfigureActivity extends BlufiAbsActivity {
 
                     @Override
                     public void onError(Throwable e) {
+                        e.printStackTrace();
                         showProgress(false);
                     }
 
